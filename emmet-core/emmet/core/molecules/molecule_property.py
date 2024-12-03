@@ -2,16 +2,16 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Sequence, Type, TypeVar, List, Optional
+from typing import List, Optional, Sequence, Type, TypeVar
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pymatgen.core.structure import Molecule
 
-from emmet.core.qchem.calc_types import LevelOfTheory
+from emmet.core.common import convert_datetime
 from emmet.core.material import PropertyOrigin
 from emmet.core.mpid import MPculeID
+from emmet.core.qchem.calc_types import LevelOfTheory
 from emmet.core.structure import MoleculeMetadata
-
 
 __author__ = "Evan Spotte-Smith <ewcspottesmith@lbl.gov>"
 
@@ -76,6 +76,11 @@ class PropertyDoc(MoleculeMetadata):
     warnings: Sequence[str] = Field(
         [], description="Any warnings related to this property"
     )
+
+    @field_validator("last_updated", mode="before")
+    @classmethod
+    def handle_datetime(cls, v):
+        return convert_datetime(cls, v)
 
     @classmethod
     def from_molecule(  # type: ignore[override]
